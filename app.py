@@ -17,17 +17,16 @@ line_bot_api = LineBotApi(os.environ.get("CHANNEL_ACCESS_TOKEN"))
 handler = WebhookHandler(os.environ.get("CHANNEL_SECRET"))
 
 
-def get_date(date_str):
-    # e.g. "上映日期：2017-03-23" -> match.group(0): "2017-03-23"
-    pattern = '\d+-\d+-\d+'
-    match = re.search(pattern, date_str)
-    if match is None:
-        return date_str
-    else:
-        return match.group(0)
-
-
 def sendMovie():
+    def get_date(date_str):
+        # e.g. "上映日期：2017-03-23" -> match.group(0): "2017-03-23"
+        pattern = '\d+-\d+-\d+'
+        match = re.search(pattern, date_str)
+        if match is None:
+            return date_str
+        else:
+            return match.group(0)
+
     Yahoo_MOVIE_URL = 'https://tw.movies.yahoo.com/movie_thisweek.html'
 
     # 以下網址後面加上 "/id=MOVIE_ID" 即為該影片各項資訊
@@ -47,17 +46,17 @@ def sendMovie():
             rows = soup.find_all('div', 'release_info_text')
             for row in rows[0:5]:
                 movie = list()
-                # 評價0
+                # 評價
                 movie.append(row.find('div', 'leveltext').span.text.strip())
-                # 片名1
+                # 片名
                 movie.append(row.find('div', 'release_movie_name').a.text.strip())
-                # 電影照片2
+                # 電影照片
                 movie.append(row.parent.find_previous_sibling('div', 'release_foto').a.img['src'])
-                # 上映日期3
+                # 上映日期
                 movie.append(get_date(row.find('div', 'release_movie_time').text))
 
                 trailer_a = row.find_next_sibling('div', 'release_btn color_btnbox').find_all('a')[1]
-                # 電影網址4
+                # 電影網址
                 movie.append(trailer_a['href'] if 'href' in trailer_a.attrs.keys() else '')
 
                 movies.append(movie)
@@ -126,6 +125,64 @@ def sendMovie():
                     ]
                 )
             )
+        line_bot_api.reply_message(event.reply_token, message)
+    except:
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
+
+
+def sendBeautyImg(event):  # 傳送表特版美女或恐龍圖
+
+    def get_web_page(url):  # 取得網頁
+        resp = requests.get(
+            url=url,
+            cookies={'over18': '1'}
+        )
+        if resp.status_code != 200:
+            return None
+        else:
+            return resp.text
+
+    def get_articles(dom):  # 取得當頁有超連結文章
+        soup = BeautifulSoup(dom, 'html5lib')
+
+        articles = list()  # 儲存取得的文章資料
+        divs = soup.find_all('div', 'r-ent')
+        for d in divs:
+            # 取得文章連結及標題
+            if d.find('a'):  # 有超連結，表示文章存在，未被刪除
+                href = d.find('a')['href']
+                articles.append(href)
+        return articles
+
+    PTT_URL = 'https://www.ptt.cc'
+
+    current_page = get_web_page(PTT_URL + '/bbs/Beauty/index.html')
+
+    articles = get_articles(current_page)
+
+    imgs = list()
+
+    for article in articles:
+        page = get_web_page(PTT_URL + article)
+        soup = BeautifulSoup(page, 'html.parser')
+        links = soup.find(id='main-content').find_all('a')
+        img_urls = list()
+        for link in links:  # 正規搜尋法尋找圖片網址
+            if re.match(r'^https?://(i.)?(m.)?imgur.com', link['href']):
+                img_urls.append(link['href'])
+                imgs.append(img_urls)
+
+    # 一維陣列亂數
+    imgs_One_dimensionalSum = int(len(imgs))
+    One_dimensionalRandom = random.randint(0, imgs_One_dimensionalSum - 1)
+    # 二維陣列亂數
+    imgs_Two_dimensionalSum = int(len(imgs[One_dimensionalRandom]))
+    Two_dimensionalRandom = random.randint(0, imgs_Two_dimensionalSum - 1)
+    try:
+        message = ImageSendMessage(  # 傳送圖片
+            original_content_url=imgs[One_dimensionalRandom][Two_dimensionalRandom],
+            preview_image_url=imgs[One_dimensionalRandom][Two_dimensionalRandom]
+        )
         line_bot_api.reply_message(event.reply_token, message)
     except:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
