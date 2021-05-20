@@ -352,11 +352,11 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message_text(event):
     get_message = event.message.text
-    if get_message == "@使用說明":
+    if get_message == "使用說明":
         sendText()
-    elif get_message == "@最新電影":
+    elif get_message == "最新電影":
         sendMovie()
-    elif get_message == "@抽":
+    elif get_message == "抽":
         sendBeautyImg()
     else:
         reply = TextSendMessage(text=f"{get_message}")
