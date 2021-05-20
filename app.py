@@ -28,11 +28,9 @@ def sendText():
                 sticker_id='2'
             )
         ]
-        return line_bot_api.reply_message(event.reply_token,
-                                          message)
+        return message
     except:
-        return line_bot_api.reply_message(event.reply_token,
-                                          TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
+        return TextSendMessage(text='發生錯誤！\n聯絡我感恩!')
 
 
 def sendMovie():
@@ -145,11 +143,9 @@ def sendMovie():
                     ]
                 )
             )
-        return line_bot_api.reply_message(event.reply_token,
-                                          message)
+        return message
     except:
-        return line_bot_api.reply_message(event.reply_token,
-                                          TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
+        return TextSendMessage(text='發生錯誤！\n聯絡我感恩!')
 
 
 def sendBeautyImg():  # 傳送表特版美女或恐龍圖
@@ -205,11 +201,9 @@ def sendBeautyImg():  # 傳送表特版美女或恐龍圖
             original_content_url=imgs[One_dimensionalRandom][Two_dimensionalRandom],
             preview_image_url=imgs[One_dimensionalRandom][Two_dimensionalRandom]
         )
-        return line_bot_api.reply_message(event.reply_token,
-                                          message)
+        return message
     except:
-        return line_bot_api.reply_message(event.reply_token,
-                                          TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
+        return TextSendMessage(text='發生錯誤！\n聯絡我感恩!')
 
 
 def sendRestaurant(event):  # 傳送附近餐廳
@@ -353,14 +347,15 @@ def callback():
 def handle_message_text(event):
     get_message = event.message.text
     if get_message == "使用說明":
-        sendText()
+        reply = sendText()
     elif get_message == "最新電影":
-        sendMovie()
+        reply = sendMovie()
     elif get_message == "抽":
-        sendBeautyImg()
+        reply = sendBeautyImg()
     else:
         reply = TextSendMessage(text=f"{get_message}")
-        line_bot_api.reply_message(event.reply_token, reply)
+
+    line_bot_api.reply_message(event.reply_token, reply)
 
 
 ## 沒有google api><"
