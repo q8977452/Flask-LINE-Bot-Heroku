@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "flask-line-bot-heroku"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
-authors = ["hsuanchi <a0025071@gmail.com>"]
+authors = ["hsuanchi <a0025071@gmail.com>", "raysin <ray0101.sin@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"

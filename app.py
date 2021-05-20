@@ -28,9 +28,11 @@ def sendText():
                 sticker_id='2'
             )
         ]
-        line_bot_api.reply_message(event.reply_token, message)
+        return line_bot_api.reply_message(event.reply_token,
+                                          message)
     except:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
+        return line_bot_api.reply_message(event.reply_token,
+                                          TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
 
 
 def sendMovie():
@@ -143,9 +145,11 @@ def sendMovie():
                     ]
                 )
             )
-        line_bot_api.reply_message(event.reply_token, message)
+        return line_bot_api.reply_message(event.reply_token,
+                                          message)
     except:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
+        return line_bot_api.reply_message(event.reply_token,
+                                          TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
 
 
 def sendBeautyImg():  # 傳送表特版美女或恐龍圖
@@ -201,9 +205,11 @@ def sendBeautyImg():  # 傳送表特版美女或恐龍圖
             original_content_url=imgs[One_dimensionalRandom][Two_dimensionalRandom],
             preview_image_url=imgs[One_dimensionalRandom][Two_dimensionalRandom]
         )
-        line_bot_api.reply_message(event.reply_token, message)
+        return line_bot_api.reply_message(event.reply_token,
+                                          message)
     except:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
+        return line_bot_api.reply_message(event.reply_token,
+                                          TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
 
 
 def sendRestaurant(event):  # 傳送附近餐廳
