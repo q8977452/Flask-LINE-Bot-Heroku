@@ -17,20 +17,118 @@ line_bot_api = LineBotApi(os.environ.get("CHANNEL_ACCESS_TOKEN"))
 handler = WebhookHandler(os.environ.get("CHANNEL_SECRET"))
 
 
-def movie():
-    target_url = 'https://movies.yahoo.com.tw/'
-    rs = requests.session()
-    res = rs.get(target_url, verify=False)
-    res.encoding = 'utf-8'
-    soup = BeautifulSoup(res.text, 'html.parser')
-    content = ""
-    for index, data in enumerate(soup.select('div.movielist_info h2 a')):
-        if index == 20:
-            return content
-        title = data.text
-        link = data['href']
-        content += '{}\n{}\n'.format(title, link)
-    return content
+def get_date(date_str):
+    # e.g. "上映日期：2017-03-23" -> match.group(0): "2017-03-23"
+    pattern = '\d+-\d+-\d+'
+    match = re.search(pattern, date_str)
+    if match is None:
+        return date_str
+    else:
+        return match.group(0)
+
+
+def sendMovie():
+    Yahoo_MOVIE_URL = 'https://tw.movies.yahoo.com/movie_thisweek.html'
+
+    # 以下網址後面加上 "/id=MOVIE_ID" 即為該影片各項資訊
+    Yahoo_INTRO_URL = 'https://tw.movies.yahoo.com/movieinfo_main.html'  # 詳細資訊
+    Yahoo_PHOTO_URL = 'https://tw.movies.yahoo.com/movieinfo_photos.html'  # 劇照
+    Yahoo_TIME_URL = 'https://tw.movies.yahoo.com/movietime_result.html'  # 時刻表
+
+    try:
+        if resp.status_code != 200:
+            message = TextSendMessage(
+                text="網站改版拉告知我!!!"
+            )
+        else:
+            dom = resp.text
+            soup = BeautifulSoup(dom, 'html5lib')
+            movies = list()
+            rows = soup.find_all('div', 'release_info_text')
+            for row in rows[0:5]:
+                movie = list()
+                # 評價0
+                movie.append(row.find('div', 'leveltext').span.text.strip())
+                # 片名1
+                movie.append(row.find('div', 'release_movie_name').a.text.strip())
+                # 電影照片2
+                movie.append(row.parent.find_previous_sibling('div', 'release_foto').a.img['src'])
+                # 上映日期3
+                movie.append(get_date(row.find('div', 'release_movie_time').text))
+
+                trailer_a = row.find_next_sibling('div', 'release_btn color_btnbox').find_all('a')[1]
+                # 電影網址4
+                movie.append(trailer_a['href'] if 'href' in trailer_a.attrs.keys() else '')
+
+                movies.append(movie)
+            message = TemplateSendMessage(
+                alt_text="電影多頁訊息",
+                template=CarouselTemplate(
+                    columns=[
+                        CarouselColumn(
+                            thumbnail_image_url=movies[0][2],
+                            title="片名:" + movies[0][1],
+                            text="網友期待度:" + movies[0][0] + "\n\n上映日期:" + movies[0][3],
+                            actions=[
+
+                                URITemplateAction(
+                                    label='電影預告',
+                                    uri=movies[0][4]
+                                ),
+
+                            ]
+                        ),
+                        CarouselColumn(
+                            thumbnail_image_url=movies[1][2],
+                            title="片名:" + movies[1][1],
+                            text="網友期待度:" + movies[1][0] + "\n\n上映日期:" + movies[1][3],
+                            actions=[
+                                URITemplateAction(
+                                    label='電影預告',
+                                    uri=movies[1][4]
+                                )
+                            ]
+                        ),
+                        CarouselColumn(
+                            thumbnail_image_url=movies[2][2],
+                            title="片名:" + movies[2][1],
+                            text="網友期待度:" + movies[2][0] + "\n\n上映日期:" + movies[2][3],
+                            actions=[
+                                URITemplateAction(
+                                    label='電影預告',
+                                    uri=movies[2][4]
+                                )
+                            ]
+                        ),
+                        CarouselColumn(
+                            thumbnail_image_url=movies[3][2],
+                            title="片名:" + movies[3][1],
+                            text="網友期待度:" + movies[3][0] + "\n\n上映日期:" + movies[3][3],
+                            actions=[
+                                URITemplateAction(
+                                    label='電影預告',
+                                    uri=movies[3][4]
+                                )
+                            ]
+                        ),
+                        CarouselColumn(
+                            thumbnail_image_url=movies[4][2],
+                            title="片名:" + movies[4][1],
+                            text="網友期待度:" + movies[4][0] + "\n\n上映日期:" + movies[4][3],
+                            actions=[
+                                URITemplateAction(
+                                    label='電影預告',
+                                    uri=movies[4][4]
+                                )
+                            ]
+                        ),
+
+                    ]
+                )
+            )
+        line_bot_api.reply_message(event.reply_token, message)
+    except:
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='發生錯誤！\n聯絡我感恩!'))
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -53,9 +151,7 @@ def callback():
 def handle_message(event):
     get_message = event.message.text
     if get_message == "最新電影":
-        a = movie()
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=a))
-    # Send To Line
+        sendMovie()
     else:
         reply = TextSendMessage(text=f"{get_message}")
         line_bot_api.reply_message(event.reply_token, reply)
