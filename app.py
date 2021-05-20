@@ -9,7 +9,7 @@ from urllib.request import urlretrieve
 # https://github.com/line/line-bot-sdk-python
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import MessageEvent, TextMessage, LocationMessage, TextSendMessage
 
 app = Flask(__name__)
 
@@ -358,6 +358,6 @@ def handle_message_text(event):
 
 
 ## 沒有google api><"
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message_text(event):
+@handler.add(MessageEvent, message=LocationMessage)
+def handle_message_location(event):
     sendRestaurant(event)
